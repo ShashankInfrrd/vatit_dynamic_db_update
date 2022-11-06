@@ -1,9 +1,11 @@
-package ai.infrrd.vatit_dynamic_db_update.listener;
+package ai.infrrd.vatit_dynamic_db_update.batch;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.stereotype.Component;
 
-public class InvoiceListener implements JobExecutionListener {
+@Component
+public class JobListener implements JobExecutionListener {
     @Override
     public void afterJob(JobExecution jobExecution) {
 

@@ -1,5 +1,6 @@
 package ai.infrrd.vatit_dynamic_db_update.config;
 
+import ai.infrrd.vatit_dynamic_db_update.batch.JobListener;
 import ai.infrrd.vatit_dynamic_db_update.model.DataSupplier;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -35,7 +36,8 @@ public class SpringBatchConfig {
                    StepBuilderFactory stepBuilderFactory,
                    ItemReader<DataSupplier> itemReader,
                    ItemProcessor<DataSupplier, DataSupplier> itemProcessor,
-                   ItemWriter<DataSupplier> itemWriter){
+                   ItemWriter<DataSupplier> itemWriter,
+                   JobListener jobExecutionListener){
         Step step=stepBuilderFactory.get("ETL-file-load")
                 .<DataSupplier, DataSupplier>chunk(1)
                 .reader(itemReader)
@@ -45,6 +47,7 @@ public class SpringBatchConfig {
         return jobBuilderFactory.get("ETL-load")
                 .incrementer(new RunIdIncrementer())
                 .start(step)
+                .listener(jobExecutionListener)
                 .build();
     }
 
