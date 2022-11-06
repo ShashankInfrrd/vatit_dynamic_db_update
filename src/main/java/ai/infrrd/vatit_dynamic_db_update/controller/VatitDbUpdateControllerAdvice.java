@@ -1,16 +1,14 @@
 package ai.infrrd.vatit_dynamic_db_update.controller;
 
 import ai.infrrd.vatit_dynamic_db_update.entities.FailedResponse;
-import ai.infrrd.vatit_dynamic_db_update.exception.BadRequestException;
-import ai.infrrd.vatit_dynamic_db_update.exception.FileCountException;
-import ai.infrrd.vatit_dynamic_db_update.exception.FileSaveException;
+import ai.infrrd.vatit_dynamic_db_update.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.multipart.MultipartException;
+
 
 import java.io.IOException;
 
@@ -18,6 +16,8 @@ import java.io.IOException;
 public class VatitDbUpdateControllerAdvice {
 
     private static final String BAD_REQUEST = "BAD_REQUEST";
+
+    public static final String UPLOAD_FAILED = "UPLOAD FAILED";
     private static final Logger LOGGER = LoggerFactory.getLogger(VatitDbUpdateControllerAdvice.class);
 
 //    @ExceptionHandler(FileFormatException.class)
@@ -32,22 +32,22 @@ public class VatitDbUpdateControllerAdvice {
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-//    @ExceptionHandler(InvalidFileArgsException.class)
-//    public ResponseEntity<?> handleInvalidFileArgsException(InvalidFileArgsException invalidFileArgsException) {
-//        LOGGER.warn(invalidFileArgsException.getMessage());
-//        return new ResponseEntity<>(new SedgwickFailedResponse(Constant.UPLOAD_FAILED, "Invalid multipart file "), HttpStatus.BAD_REQUEST);
-//    }
+    @ExceptionHandler(InvalidFileArgsException.class)
+    public ResponseEntity<?> handleInvalidFileArgsException(InvalidFileArgsException invalidFileArgsException) {
+        LOGGER.warn(invalidFileArgsException.getMessage());
+        return new ResponseEntity<>(new FailedResponse(UPLOAD_FAILED, "Invalid multipart file "), HttpStatus.BAD_REQUEST);
+    }
 //
 //    @ExceptionHandler(MultipartException.class)
 //    public ResponseEntity<?> handleMultiPartException(MultipartException multipartException) {
 //        return new ResponseEntity<>(new SedgwickFailedResponse(Constant.UPLOAD_FAILED, "Invalid multipart file "), HttpStatus.BAD_REQUEST);
 //    }
 //
-//    @ExceptionHandler(InvalidApiKeyFormatException.class)
-//    public ResponseEntity<?> handleInvalidApiKey(InvalidApiKeyFormatException invalidApiKeyFormatException) {
-//        LOGGER.warn(invalidApiKeyFormatException.getMessage());
-//        return new ResponseEntity<>(new SedgwickFailedResponse(Constant.UPLOAD_FAILED, invalidApiKeyFormatException.getMessage()), HttpStatus.BAD_REQUEST);
-//    }
+    @ExceptionHandler(InvalidApiKeyFormatException.class)
+    public ResponseEntity<?> handleInvalidApiKey(InvalidApiKeyFormatException invalidApiKeyFormatException) {
+        LOGGER.warn(invalidApiKeyFormatException.getMessage());
+        return new ResponseEntity<>(new FailedResponse(UPLOAD_FAILED, invalidApiKeyFormatException.getMessage()), HttpStatus.BAD_REQUEST);
+    }
 //
 //    @ExceptionHandler(UpstreamServerException.class)
 //    public ResponseEntity<?> handleUpstreamServerException(UpstreamServerException upstreamServerException) {

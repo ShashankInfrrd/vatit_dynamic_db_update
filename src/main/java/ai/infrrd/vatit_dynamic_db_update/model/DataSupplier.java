@@ -1,6 +1,11 @@
 package ai.infrrd.vatit_dynamic_db_update.model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
 public class DataSupplier {
+   @Id
     int studentId;
     String firstName;
     String secondName;

@@ -1,8 +1,10 @@
 package ai.infrrd.vatit_dynamic_db_update.controller;
 
 import ai.infrrd.vatit_dynamic_db_update.entities.FileUploadResponse;
+import ai.infrrd.vatit_dynamic_db_update.exception.InvalidApiKeyFormatException;
+import ai.infrrd.vatit_dynamic_db_update.exception.InvalidFileArgsException;
+import ai.infrrd.vatit_dynamic_db_update.service.DynamicDbUpdation;
 import ai.infrrd.vatit_dynamic_db_update.service.FileService;
-import ai.infrrd.vatit_dynamic_db_update.service.ThreadParkingService;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +25,9 @@ public class VatitDbUpdateController {
 
     @Autowired
     private FileService fileService;
-
     @Autowired
-    private ThreadParkingService threadParkingService;
+    private DynamicDbUpdation dynamicDbUpdation;
 
-//    @Autowired
-//    private SupplierDB supplierDB;
     private static final Logger LOGGER = LoggerFactory.getLogger(VatitDbUpdateController.class);
     private static final String KEY = "apikey";
 
@@ -38,24 +37,17 @@ public class VatitDbUpdateController {
             String apiKey = httpHeader.get(KEY);
             FileUploadResponse responseEntity = fileService.handleFile(multipartFile, apiKey);
             LOGGER.info("Upload requestId {} ", responseEntity.getRequestId());
-//            String requestId = Objects.requireNonNull(responseEntity).getRequestId();
-//            threadParkingService.parkThread(responseEntity);
-//            ResponseObject response = threadParkingService.getCallBackData(requestId);
-//            threadParkingService.removeThreadInfo(requestId);
             return new ResponseEntity<>(responseEntity, HttpStatus.OK);
         } else {
-//            throw new InvalidFileArgsException("File list empty ");
-            return new ResponseEntity<>("esf", HttpStatus.OK);
+            throw new InvalidFileArgsException("File list empty ");
         }
     }
-//
-//    @RequestMapping(value = "/s",method= RequestMethod.GET)
-//    public List<SupplierData> show()
-//    {
-//        return supplierDB.findAll();
-//    }
 
-
+    @GetMapping("/showStatus/{scanId}")
+    public ResponseEntity<?> showStatus(@PathVariable("scanId") String scanId)
+    {
+        return new ResponseEntity<>(dynamicDbUpdation.jobStatus(scanId), HttpStatus.OK);
+    }
 
     private boolean preProcessFileName(MultipartFile multipartFile) {
             if (Objects.requireNonNull(multipartFile.getOriginalFilename()).isBlank() || multipartFile.isEmpty()) {
@@ -68,8 +60,7 @@ public class VatitDbUpdateController {
         if (httpHeader.containsKey(KEY) && !httpHeader.get(KEY).isBlank())
             return true;
         else {
-//            throw new InvalidApiKeyFormatException("Invalid api/value pair ");
-            return false;
+            throw new InvalidApiKeyFormatException("Invalid api/value pair ");
         }
     }
 }

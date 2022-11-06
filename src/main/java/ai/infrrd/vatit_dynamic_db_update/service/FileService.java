@@ -10,7 +10,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
@@ -23,40 +22,27 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.function.BiPredicate;
 
 @Service
 public class FileService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileService.class);
-    private static final String FILE_UPLOADED="file uploaded";
 
     @Value("${upload.path}")
     private String uploadDirectory;
 
-//    @Value("${titan.post.url}")
-//    private String titanUploadEndPoint;
-
-
-//    @Autowired
-//    private RestTemplate restTemplate;
-
     @Autowired
     private DynamicDbUpdation dynamicDbUpdation;
 
-
-//    @LogExecutionTime
     public FileUploadResponse handleFile(MultipartFile multipartFile, String apiKey) throws IOException {
         FileUploadResponse fileUploadResponse;
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
         saveFile(fileName,multipartFile,uploadDirectory);
         fileUploadResponse = initialFileUpload(fileName);
         Resource fileResource = getFileResource(fileName);
-        System.out.println(dynamicDbUpdation.dynamicUpdation(fileUploadResponse,fileResource,fileName));
-        deleteFiles(fileName);
+        dynamicDbUpdation.dynamicUpdation(fileUploadResponse,fileResource,fileName);
         return fileUploadResponse;
     }
 
-//    @LogExecutionTime
     private FileUploadResponse initialFileUpload(String fileName) throws IOException {
             UUID uuid = UUID.randomUUID();
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -80,15 +66,14 @@ public class FileService {
         }
     }
 
-//    @LogExecutionTime
-    private void deleteFiles(String deletionFiles) {
-        LOGGER.info("Starting file deletion ");
-        if(!deletionFiles.isEmpty())
-        deleteFile(deletionFiles);
-        LOGGER.info("File deletion complete");
-    }
+    public void deleteFiles(String deletionFiles) {
+            LOGGER.info("Starting file deletion ");
+            if(!deletionFiles.isEmpty())
+            deleteFile(deletionFiles);
+            LOGGER.info("File deletion complete");
+        }
 
-    private void deleteFile(String fileName) {
+    public void deleteFile(String fileName) {
         try {
             Files.delete(Paths.get(uploadDirectory).resolve(fileName));
         } catch (IOException ex) {
@@ -102,14 +87,8 @@ public class FileService {
             System.out.println(filePath.toAbsolutePath());
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
             return uploadPath;
-//        } catch (IOException exception) {
-//            throw new IOException("Could Not save file ");
-//        }
-    } catch (Exception exception) {
-//        throw new IOException("Could Not save file ");
-            System.out.println(exception);
+        } catch (IOException exception) {
             throw new IOException("Could Not save file ");
+        }
     }
-    }
-
 }
